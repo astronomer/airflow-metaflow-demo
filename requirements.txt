@@ -1,1 +1,4 @@
-metaflow
+metaflow==2.8.6
+pylint==2.17.4
+tensorflow==2.12.0
+keras==2.12.0
