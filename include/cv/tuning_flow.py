@@ -3,6 +3,11 @@ from metaflow.cards import Image, Table
 from tensorflow import keras
 from models import ModelOperations
 
+# These env vars are set in the Docker image 
+# pod_env_vars = {'AWS_ACCESS_KEY_ID': os.environ.get('AWS_ACCESS_KEY_ID'), 'AWS_SECRET_ACCESS_KEY': os.environ.get('AWS_SECRET_ACCESS_KEY')}
+# pod_image = 'pod_image:latest'
+
+
 class TuningFlow(FlowSpec, ModelOperations):
 
     best_model_location = ("best_tuned_model")

@@ -4,4 +4,4 @@
 airflow_settings.yaml
 __pycache__/
 astro
-include/kube_config
+include/.kube/config

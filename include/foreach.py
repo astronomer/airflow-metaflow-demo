@@ -1,4 +1,4 @@
-from metaflow import FlowSpec, step
+from metaflow import FlowSpec, step, environment
 
 class ForeachFlow(FlowSpec):
 
@@ -8,7 +8,7 @@ class ForeachFlow(FlowSpec):
                        'House of Cards',
                        'Narcos']
         self.next(self.a, foreach='titles')
-
+    
     @step
     def a(self):
         self.title = '%s processed' % self.input

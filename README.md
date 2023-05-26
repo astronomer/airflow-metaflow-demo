@@ -1,3 +1,6 @@
+<img style="display: block; float: left; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/airflow.png"/> <img style="display: block; float: right; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/metaflow.png"/>
+
+  
 Overview
 ========
 
@@ -45,7 +48,7 @@ Networking: Docker Desktop automatically creates a local network using `host.doc
 ```sh
 git clone https://github.com/astronomer/airflow-metaflow-demo
 cd airflow-metaflow-demo
-cp ~/.kube/config include/kube_config
+cp -R ~/.kube/config include/.kube/
 ```
   
 2. Start Airflow, Metaflow and Minio on your local machine by running 
@@ -63,6 +66,12 @@ This command will spin up 8 Docker containers on your machine including:
 - Metaflow-ui-backend: The Metaflow UI backend service.
 - Metaflow-metadata-service: The metadata service for Metaflow
 - Minio: An S3 compatible object storage service.
+  
+Access the UIs for your local project. 
+- Airflow UI: http://localhost:8080/ login is `admin` password is `admin`
+- Metaflow UI: http://localhost:3000/
+- Minio: http://localhost:9001/ login is `admin` password is `adminadmin`
+
 
 3. Verify that all 8 Docker containers were created by running 'docker ps'.
 
@@ -70,7 +79,7 @@ This command will spin up 8 Docker containers on your machine including:
     
     Metaflow has the ability to [export a flow as an Airflow DAG](https://docs.metaflow.org/production/scheduling-metaflow-flows/scheduling-with-airflow). This demo environment has already been [configured](https://outerbounds.com/engineering/operations/airflow/#configuring-metaflow-for-airflow) for this process. 
     
-    For this demo we will use a sample from [Outerbounds' fantastic set of tutorials](https://outerbounds.com/docs/cv-tutorial-S1E3/)
+    For this demo we will use a sample from [Outerbounds' fantastic set of tutorials](https://outerbounds.com/docs/tutorials-index/)
 
     The demo includes a sample machine learning workflow for computer vision copied with ❤️ from https://github.com/outerbounds/tutorials/tree/main/cv
 
@@ -79,17 +88,29 @@ This command will spin up 8 Docker containers on your machine including:
 ```sh
 astro dev bash -s
 ```
+The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG.
 ```sh
 cd dags
-python ../include/cv/model_comparison_flow.py airflow create model_comparison_dag.py 
-python ../include/cv/tuning_flow.py airflow create tuning_dag.py 
+python ../include/foreach.py --with environment:vars='{"AWS_ACCESS_KEY_ID": "admin", "AWS_SECRET_ACCESS_KEY": "adminadmin"}'  airflow create foreach_dag.py
 ```
 
-When adding new DAGs to Airflow it may take up to 30 seconds for the DAG to appear in the UI.
-
+5. Login to the [Airflow UI](http://localhost:8080/) and run the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) DAG.
   
-5. Access the UIs for your local project. 
-- Airflow: http://localhost:8080/ login is `admin` password is `admin`
-- Metaflow: http://localhost:3000/
-- Minio: http://localhost:9001/ login is `admin` password is `adminadmin`
+6. The `includes` directory provides a more advanced example for [ML Computer Vision models](https://outerbounds.com/docs/cv-tutorial-S1E3/).  This requires a kubernetes pod image with tensorflow installed which can be built as follows:
+```bash
+cd include
+docker build -t pod_image:latest .
+```
 
+7. Connect to the Airflow container and export the flows
+```sh
+astro dev bash -s
+```
+The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG.
+```sh
+cd dags
+python ../include/cv/model_comparison_flow.py --with kubernetes:image='pod_image:latest' airflow create model_comparison_dag.py 
+python ../include/cv/tuning_flow.py --with kubernetes:image='pod_image:latest' airflow create tuning_dag.py 
+```
+
+8. Run the [ModelComparisonFLow](http://localhost:8080/dags/ModelComparisonFlow/grid) and [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
