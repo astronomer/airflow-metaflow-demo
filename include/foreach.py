@@ -1,4 +1,4 @@
-from metaflow import FlowSpec, step, environment
+from metaflow import FlowSpec, step
 
 class ForeachFlow(FlowSpec):
 

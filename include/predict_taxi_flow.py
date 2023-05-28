@@ -1,29 +1,65 @@
-def predict(featuredf:SnowparkTable, run_id:str) -> Table:
-		import mlflow 
+from metaflow import FlowSpec, step, namespace
+
+namespace('user:astro')
+class PredictTripDurationFlow(FlowSpec):
+
+	@step
+	def start(self):
+		from metaflow import Flow, S3
+		import pandas as pd
+
+		with S3() as s3:
+			data=s3.get('s3://metaflow-test/taxi_data.parquet')
+			self.taxi_data = pd.read_parquet(data.path)
+
+		self.X = self.taxi_data.drop(self.taxi_data[['pickup_location_id', 'dropoff_location_id', 'hour_of_day', 'trip_duration_seconds', 'trip_distance']], axis=1)
 		
-		pred_table = SnowparkTable(name='TAXI_PRED')
+		flow = Flow('TrainTripDurationFlow')
+		self.train_run = flow.latest_successful_run
 
-		run = mlflow.get_run(run_id=run_id)
+		self.next(self.predict)
 
-		lr = mlflow.sklearn.load_model('runs:/'+run_id+'/model')
+	@step
+	def predict(self):
+		from sklearn.linear_model import LinearRegression
 		
-		df = featuredf.to_pandas()
-		X = df.drop(df[['PICKUP_LOCATION_ID', 'DROPOFF_LOCATION_ID', 'HOUR_OF_DAY', 'HOUR', 'TRIP_DURATION_SEC', 'TRIP_DISTANCE']], axis=1)
-				
-		#look for drift 
-		drifts={}
-		for feature in ['HOUR', 'TRIP_DURATION_SEC', 'TRIP_DISTANCE']:
-			drifts[feature] = df[feature].std() - run.data.metrics[feature+'_std']
+		self.y_pred = self.train_run['train_model'].task.data.lr.predict(self.X).reshape(-1)
 
-		df['PREDICTED_DURATION'] = lr.predict(X).astype(int)
+		self.next(self.eval)
 
-		write_columns = ['PICKUP_LOCATION_ID', 'DROPOFF_LOCATION_ID', 'HOUR_OF_DAY', 'PREDICTED_DURATION', 'TRIP_DURATION_SEC']
+	@step
+	def eval(self):
 
-		snowpark_session.write_pandas(
-			df[write_columns], 
-			table_name=pred_table.name,
-			auto_create_table=True,
-			overwrite=True
-		)
+		train_distribution = self.train_run['end'].task.data._artifacts['pred_distribution'].data
 
-		return pred_table
+		feature_distributions = self.train_run['end'].task.data._artifacts['feature_distributions'].data
+		
+		self.concept_drift = {
+			'std': self.y_pred.std() - train_distribution['pred_std'],
+			'mean': self.y_pred.mean() - train_distribution['pred_mean']
+		}
+		
+		self.data_drifts={}
+		for feature in ['hour_of_day', 'trip_distance']:
+			self.data_drifts[feature] = self.taxi_data[feature].astype('float').std() - feature_distributions[feature+'_std']
+		
+		self.next(self.end)
+
+	@step
+	def end(self):
+		import pandas as pd
+		from metaflow import S3
+		import tempfile
+
+		with tempfile.TemporaryFile() as tf, S3() as s3:
+			pd.concat([self.taxi_data[['pickup_location_id', 
+			 					  	   'dropoff_location_id', 
+									   'hour_of_day',  
+									   'trip_distance']], 
+						pd.DataFrame(self.y_pred, columns=['trip_duration_pred'])],
+						axis=1)\
+			  .to_parquet(tf)
+			s3.put('s3://metaflow-test/taxi_pred.parquet', tf, overwrite=True)
+
+if __name__ == '__main__':
+    PredictTripDurationFlow()

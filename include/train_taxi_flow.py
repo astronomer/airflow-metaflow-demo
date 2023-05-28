@@ -1,28 +1,50 @@
-	def train(featuredf:SnowparkTable, experiment_id:str) -> str:
-		from sklearn.linear_model import LinearRegression
+from metaflow import FlowSpec, step, namespace
+
+namespace('user:astro')
+class TrainTripDurationFlow(FlowSpec):
+
+	@step
+	def start(self):
+		from metaflow import S3
+		import pandas as pd
+
+		with S3() as s3:
+			data=s3.get('s3://metaflow-test/taxi_data.parquet')
+			self.taxi_data = pd.read_parquet(data.path)
+
+		self.X = self.taxi_data.drop(self.taxi_data[['pickup_location_id', 'dropoff_location_id', 'hour_of_day', 'trip_duration_seconds', 'trip_distance']], axis=1)
+		self.y = self.taxi_data[['trip_duration_seconds']]
+		self.next(self.train_model)
+
+	@step
+	def train_model(self):
 		from sklearn.model_selection import train_test_split
+		from sklearn.linear_model import LinearRegression
 		from sklearn.metrics import mean_squared_error
-		import mlflow
 
-		mlflow.sklearn.autolog(exclusive=False)
+		X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.33, random_state=42)
+		
+		self.lr = LinearRegression().fit(X_train, y_train)
 
-		with mlflow.start_run(experiment_id=experiment_id, run_name='trip_duration_estimator') as run:
-			run_id=run.info.run_id
+		self.y_pred = self.lr.predict(self.X).reshape(-1)
 
-			df = featuredf.to_pandas()
-			X = df.drop(df[['PICKUP_LOCATION_ID', 'DROPOFF_LOCATION_ID', 'HOUR_OF_DAY', 'HOUR', 'TRIP_DURATION_SEC', 'TRIP_DISTANCE']], axis=1)
-			y = df[['TRIP_DURATION_SEC']]
+		self.mse = mean_squared_error(y_true = y_test, y_pred=self.lr.predict(X_test).reshape(-1))
+		self.next(self.end)
 
-			X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
-			
-			lr = LinearRegression().fit(X_train, y_train)
+	@step
+	def end(self):
 
-			test_pred = lr.predict(X_test).reshape(-1)
+		self.pred_distribution = {
+			'pred_std': self.y_pred.std(),
+			'pred_mean': self.y_pred.mean()
+		}
+		
+		self.feature_distributions = {}
+		for feature in ['hour_of_day', 'trip_distance']:
+			self.feature_distributions.update({
+				feature+'_std': self.taxi_data[feature].astype('float').std(),
+				feature+'_mean': self.taxi_data[feature].astype('float').mean()
+				      })
 
-			feature_distributions = {}
-			for feature in ['HOUR', 'TRIP_DURATION_SEC', 'TRIP_DISTANCE']:
-				feature_distributions.update({feature+'_std': df[feature].std()})
-
-			mlflow.log_metrics(feature_distributions)
-
-			return run_id
+if __name__ == '__main__':
+    TrainTripDurationFlow()

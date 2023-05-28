@@ -88,13 +88,14 @@ Access the UIs for your local project.
 ```sh
 astro dev bash -s
 ```
-The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG.
+The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG and trigger a DAG run.
 ```sh
-cd dags
+cd /usr/local/airflow/dags
 python ../include/foreach.py --with environment:vars='{"AWS_ACCESS_KEY_ID": "admin", "AWS_SECRET_ACCESS_KEY": "adminadmin"}'  airflow create foreach_dag.py
+airflow dags trigger ForeachFlow
 ```
 
-5. Login to the [Airflow UI](http://localhost:8080/) and run the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) DAG.
+5. Login to the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) to track the status of the DAG run.
   
 6. The `includes` directory provides a more advanced example for [ML Computer Vision models](https://outerbounds.com/docs/cv-tutorial-S1E3/).  This requires a kubernetes pod image with tensorflow installed which can be built as follows:
 ```bash
@@ -106,11 +107,25 @@ docker build -t pod_image:latest .
 ```sh
 astro dev bash -s
 ```
-The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG.
+Export the `ModelComparisonFlow` and `TuningFlow` flows a a Airflow DAGs and trigger DAG runs.
 ```sh
-cd dags
+cd /usr/local/airflow/dags
 python ../include/cv/model_comparison_flow.py --with kubernetes:image='pod_image:latest' airflow create model_comparison_dag.py 
 python ../include/cv/tuning_flow.py --with kubernetes:image='pod_image:latest' airflow create tuning_dag.py 
+airflow dags trigger ModelComparisonFlow
+airflow dags trigger TuningFlow
 ```
 
-8. Run the [ModelComparisonFLow](http://localhost:8080/dags/ModelComparisonFlow/grid) and [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
+8. Connect to the Airflow UI to track status for [ModelComparisonFLow](http://localhost:8080/dags/ModelComparisonFlow/grid) and [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
+
+
+WIP
+```sh
+astro dev bash -s
+```
+```bash
+airflow dags trigger data_engineering_day.py
+cd /usr/local/airflow/dags
+python ../include/train_taxi_flow.py airflow create train_taxi_flow.py
+python ../include/predict_taxi_flow.py airflow create predict_taxi_flow.py
+```

@@ -1,4 +1,4 @@
-from metaflow import FlowSpec, step, Flow, current, card, environment
+from metaflow import FlowSpec, step, current, card
 from metaflow.cards import Image, Table
 from tensorflow import keras
 from models import ModelOperations
