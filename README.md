@@ -79,8 +79,7 @@ Access the UIs for your local project.
 ```bash
 docker build -t pod_image:1 include/
 ```
-### TODO: Workaround to tag image as python:3.9 becasue --with kubernetes:image='pod_image:1' is not working.  
-  
+    
 5. Create an Airflow DAG.
     
     Metaflow has the ability to [export a flow as an Airflow DAG](https://docs.metaflow.org/production/scheduling-metaflow-flows/scheduling-with-airflow). This demo environment has already been [configured](https://outerbounds.com/engineering/operations/airflow/#configuring-metaflow-for-airflow) for this process. 
