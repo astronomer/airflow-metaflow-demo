@@ -9,7 +9,7 @@ class PredictTripDurationFlow(FlowSpec):
 		import pandas as pd
 
 		with S3() as s3:
-			data=s3.get('s3://metaflow-data/taxi_data.parquet')
+			data=s3.get('s3://taxi-data/taxi_features.parquet')
 			self.taxi_data = pd.read_parquet(data.path)
 
 		self.X = self.taxi_data.drop(self.taxi_data[['pickup_location_id', 'dropoff_location_id', 'hour_of_day', 'trip_duration_seconds', 'trip_distance']], axis=1)

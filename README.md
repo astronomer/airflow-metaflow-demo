@@ -80,7 +80,7 @@ Access the UIs for your local project.
 docker build -t pod_image:latest include/
 docker tag pod_image:latest python:3.9
 ```
-### TODO: fix image issue
+### TODO: Workaround to tag image as python:3.9 becasue --with kubernetes:image='pod_image:latest' is not working.  
   
 5. Create an Airflow DAG.
     
@@ -89,24 +89,9 @@ docker tag pod_image:latest python:3.9
     For this demo we will use a sample from [Outerbounds' fantastic set of tutorials](https://outerbounds.com/docs/tutorials-index/)
 
     The demo includes a sample machine learning workflow for computer vision copied with ❤️ from https://github.com/outerbounds/tutorials/tree/main/cv
-
-    To run this demo you can install metaflow python libraries in a local python environment or connect to the Airflow scheduler container.  
-
-```sh
-astro dev bash -s
-```
-The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG and trigger a DAG run.
-```sh
-cd /usr/local/airflow/dags
-python ../include/foreach.py  airflow create foreach_dag.py
-sleep 15
-airflow dags trigger ForeachFlow
-```
-### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
   
-6. Login to the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) to track the status of the DAG run.
+    Connect to the Airflow scheduler container to create the DAGs for the `ModelComparison` and `TuningFlow` flows:
   
-7. Connect to the Airflow container and export the flows
 ```sh
 astro dev bash -s
 ```
@@ -120,19 +105,30 @@ sleep 15
 airflow dags trigger ModelComparisonFlow
 airflow dags trigger TuningFlow
 ```
+By default the `dags` directory is only scanned for new files every 5 minutes.  For this demo the list interval was set to 10 seconds via `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` in the `.env` file.  This is not advised in production.
 
+  
 8. Connect to the Airflow UI to track status for [ModelComparisonFLow](http://localhost:8080/dags/ModelComparisonFlow/grid) and [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
 
+9. Often different teams will use different tools.  In the next example the Data Engineering team is using Airflow for ELT and feature engineering while the ML team is using Metaflow for model training, prediction and evaluation.  In the next workflow the ML team builds their flows and creates Airflow DAGs which are automatically triggered by [Airflow Data Aware Scheduling](https://docs.astronomer.io/learn/airflow-datasets).
 
-WIP
+### work in progress
 ```sh
 astro dev bash -s
 ```
 ```bash
+airflow dags unpause data_engineering_dag
 airflow dags trigger data_engineering_dag
 cd /usr/local/airflow/dags
 python ../include/train_taxi_flow.py airflow create train_taxi_dag.py
 python ../include/predict_taxi_flow.py airflow create predict_taxi_dag.py
 sleep 15
+airflow dags trigger TrainTripDurationFlow
+sleep 15
+airflow dags trigger PredictTripDurationFlow
 ```
 ### TODO: tshoot --with kubernetes:image='pod_image:latest'
+
+### TODO: setup data aware scheduling with MF.
+
+### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
