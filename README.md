@@ -91,7 +91,7 @@ astro dev bash -s
 The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export this flow as an Airflow DAG and trigger a DAG run.
 ```sh
 cd /usr/local/airflow/dags
-python ../include/foreach.py --with environment:vars='{"AWS_ACCESS_KEY_ID": "admin", "AWS_SECRET_ACCESS_KEY": "adminadmin"}'  airflow create foreach_dag.py
+python ../include/foreach.py  airflow create foreach_dag.py
 sleep 15
 airflow dags trigger ForeachFlow
 ```
@@ -101,8 +101,7 @@ airflow dags trigger ForeachFlow
   
 6. The `includes` directory provides a more advanced example for [ML Computer Vision models](https://outerbounds.com/docs/cv-tutorial-S1E3/).  This requires a kubernetes pod image with tensorflow installed which can be built as follows:
 ```bash
-cd include
-docker build -t pod_image:latest .
+docker build -t pod_image:latest include/
 docker tag pod_image:latest python:3.9
 ```
 ### TODO: fix image issue
