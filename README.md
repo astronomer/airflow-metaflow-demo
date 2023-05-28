@@ -74,8 +74,15 @@ Access the UIs for your local project.
 
 
 3. Verify that all 8 Docker containers were created by running 'docker ps'.
-
-4. Create an Airflow DAG.
+  
+4. Build the OCI image for the Kubernetes pods:
+```bash
+docker build -t pod_image:latest include/
+docker tag pod_image:latest python:3.9
+```
+### TODO: fix image issue
+  
+5. Create an Airflow DAG.
     
     Metaflow has the ability to [export a flow as an Airflow DAG](https://docs.metaflow.org/production/scheduling-metaflow-flows/scheduling-with-airflow). This demo environment has already been [configured](https://outerbounds.com/engineering/operations/airflow/#configuring-metaflow-for-airflow) for this process. 
     
@@ -96,16 +103,9 @@ sleep 15
 airflow dags trigger ForeachFlow
 ```
 ### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
-
-5. Login to the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) to track the status of the DAG run.
   
-6. The `includes` directory provides a more advanced example for [ML Computer Vision models](https://outerbounds.com/docs/cv-tutorial-S1E3/).  This requires a kubernetes pod image with tensorflow installed which can be built as follows:
-```bash
-docker build -t pod_image:latest include/
-docker tag pod_image:latest python:3.9
-```
-### TODO: fix image issue
-
+6. Login to the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) to track the status of the DAG run.
+  
 7. Connect to the Airflow container and export the flows
 ```sh
 astro dev bash -s
