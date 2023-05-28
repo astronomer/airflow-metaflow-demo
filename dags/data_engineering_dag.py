@@ -68,7 +68,7 @@ def data_engineering_dag():
 	_feature_file = aql.export_file(
 		task_id='export', 
 		input_data=_feature_table, 
-		output_file=File(path='S3://metaflow-test/taxi_data.parquet', conn_id=_S3_CONN_ID), 
+		output_file=File(path='S3://metaflow-data/taxi_data.parquet', conn_id=_S3_CONN_ID), 
 		if_exists='replace') >> aql.cleanup()
 
 data_engineering_dag()
