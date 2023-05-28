@@ -77,10 +77,9 @@ Access the UIs for your local project.
   
 4. Build the OCI image for the Kubernetes pods:
 ```bash
-docker build -t pod_image:latest include/
-docker tag pod_image:latest python:3.9
+docker build -t pod_image:1 include/
 ```
-### TODO: Workaround to tag image as python:3.9 becasue --with kubernetes:image='pod_image:latest' is not working.  
+### TODO: Workaround to tag image as python:3.9 becasue --with kubernetes:image='pod_image:1' is not working.  
   
 5. Create an Airflow DAG.
     
@@ -95,12 +94,11 @@ docker tag pod_image:latest python:3.9
 ```sh
 astro dev bash -s
 ```
-### TODO: fix --with kubernetes:image='pod_image:latest'
 Export the `ModelComparisonFlow` and `TuningFlow` flows a a Airflow DAGs and trigger DAG runs.
 ```sh
 cd /usr/local/airflow/dags
-python ../include/cv/model_comparison_flow.py airflow create model_comparison_dag.py 
-python ../include/cv/tuning_flow.py airflow create tuning_dag.py 
+python ../include/cv/model_comparison_flow.py --with kubernetes:image='pod_image:1' airflow create model_comparison_dag.py 
+python ../include/cv/tuning_flow.py --with kubernetes:image='pod_image:1' airflow create tuning_dag.py 
 sleep 15
 airflow dags trigger ModelComparisonFlow
 airflow dags trigger TuningFlow
@@ -120,15 +118,14 @@ astro dev bash -s
 airflow dags unpause data_engineering_dag
 airflow dags trigger data_engineering_dag
 cd /usr/local/airflow/dags
-python ../include/train_taxi_flow.py airflow create train_taxi_dag.py
-python ../include/predict_taxi_flow.py airflow create predict_taxi_dag.py
+python ../include/train_taxi_flow.py --with kubernetes:image='pod_image:1' airflow create train_taxi_dag.py
+python ../include/predict_taxi_flow.py --with kubernetes:image='pod_image:1' airflow create predict_taxi_dag.py
 sleep 15
 airflow dags trigger TrainTripDurationFlow
 sleep 15
 airflow dags trigger PredictTripDurationFlow
 ```
-### TODO: tshoot --with kubernetes:image='pod_image:latest'
 
 ### TODO: setup data aware scheduling with MF.
-
+### TODO: fix namespace issue so we don't have to use global
 ### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
