@@ -88,24 +88,24 @@ docker build -t pod_image:1 include/
 
     The demo includes a sample machine learning workflow for computer vision copied with ❤️ from https://github.com/outerbounds/tutorials/tree/main/cv
   
-    Connect to the Airflow scheduler container to create the DAGs for the `ModelComparison` and `TuningFlow` flows:
+    Connect to the Airflow scheduler container to create the DAGs for the `TuningFlow` flows:
   
 ```sh
 astro dev bash -s
 ```
-Export the `ModelComparisonFlow` and `TuningFlow` flows a a Airflow DAGs and trigger DAG runs.
+Export the `TuningFlow` as a Airflow DAGs and trigger DAG runs.
 ```sh
 cd /usr/local/airflow/dags
-python ../include/cv/model_comparison_flow.py --with kubernetes:image='pod_image:1' airflow create model_comparison_dag.py 
-python ../include/cv/tuning_flow.py --with kubernetes:image='pod_image:1' airflow create tuning_dag.py 
+python ../include/cv/tuning_flow.py \
+    --with kubernetes:image='pod_image:1' \
+    airflow create tuning_dag.py 
 sleep 15
-airflow dags trigger ModelComparisonFlow
 airflow dags trigger TuningFlow
 ```
 By default the `dags` directory is only scanned for new files every 5 minutes.  For this demo the list interval was set to 10 seconds via `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` in the `.env` file.  This is not advised in production.
 
   
-8. Connect to the Airflow UI to track status for [ModelComparisonFLow](http://localhost:8080/dags/ModelComparisonFlow/grid) and [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
+8. Connect to the Airflow UI to track status for [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
 
 9. Often different teams will use different tools.  In the next example the Data Engineering team is using Airflow for ELT and feature engineering while the ML team is using Metaflow for model training, prediction and evaluation.  In the next workflow the ML team builds their flows and creates Airflow DAGs which are automatically triggered by [Airflow Data Aware Scheduling](https://docs.astronomer.io/learn/airflow-datasets).
 
@@ -117,14 +117,23 @@ astro dev bash -s
 airflow dags unpause data_engineering_dag
 airflow dags trigger data_engineering_dag
 cd /usr/local/airflow/dags
-python ../include/train_taxi_flow.py --with kubernetes:image='pod_image:1' airflow create train_taxi_dag.py
-python ../include/predict_taxi_flow.py --with kubernetes:image='pod_image:1' airflow create predict_taxi_dag.py
+python ../include/train_taxi_flow.py \
+    --with kubernetes:image='pod_image:1' \
+    airflow create train_taxi_dag.py
 sleep 15
 airflow dags trigger TrainTripDurationFlow
-sleep 15
+python ../include/predict_taxi_flow.py \
+    --with kubernetes:image='pod_image:1' \
+    airflow create predict_taxi_dag.py
+sleep 25
 airflow dags trigger PredictTripDurationFlow
 ```
+  
+10. Connect to the Airflow UI to track status for the [TrainTripDurationFlow](http://localhost:8080/dags/TrainTripDurationFlow/grid) and [PredictTripDurationFlow](http://localhost:8080/dags/PredictTripDurationFlow/grid) flows.
 
-### TODO: setup data aware scheduling with MF.
+
+
+### TODO: setup data aware scheduling with metaflows airflow create.
 ### TODO: fix namespace issue so we don't have to use global
 ### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
+### TODO: How to run in astro hosted?
