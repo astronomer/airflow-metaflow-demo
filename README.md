@@ -92,8 +92,10 @@ The 'foreach' flow is a simple flow to show the use of Metaflow foreach.  Export
 ```sh
 cd /usr/local/airflow/dags
 python ../include/foreach.py --with environment:vars='{"AWS_ACCESS_KEY_ID": "admin", "AWS_SECRET_ACCESS_KEY": "adminadmin"}'  airflow create foreach_dag.py
+sleep 15
 airflow dags trigger ForeachFlow
 ```
+### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
 
 5. Login to the [ForeachFlow](http://localhost:8080/dags/ForeachFlow/grid) to track the status of the DAG run.
   
@@ -101,17 +103,21 @@ airflow dags trigger ForeachFlow
 ```bash
 cd include
 docker build -t pod_image:latest .
+docker tag pod_image:latest python:3.9
 ```
+### TODO: fix image issue
 
 7. Connect to the Airflow container and export the flows
 ```sh
 astro dev bash -s
 ```
+### TODO: fix --with kubernetes:image='pod_image:latest'
 Export the `ModelComparisonFlow` and `TuningFlow` flows a a Airflow DAGs and trigger DAG runs.
 ```sh
 cd /usr/local/airflow/dags
-python ../include/cv/model_comparison_flow.py --with kubernetes:image='pod_image:latest' airflow create model_comparison_dag.py 
-python ../include/cv/tuning_flow.py --with kubernetes:image='pod_image:latest' airflow create tuning_dag.py 
+python ../include/cv/model_comparison_flow.py airflow create model_comparison_dag.py 
+python ../include/cv/tuning_flow.py airflow create tuning_dag.py 
+sleep 15
 airflow dags trigger ModelComparisonFlow
 airflow dags trigger TuningFlow
 ```
@@ -124,8 +130,10 @@ WIP
 astro dev bash -s
 ```
 ```bash
-airflow dags trigger data_engineering_day.py
+airflow dags trigger data_engineering_dag
 cd /usr/local/airflow/dags
 python ../include/train_taxi_flow.py airflow create train_taxi_dag.py
 python ../include/predict_taxi_flow.py airflow create predict_taxi_dag.py
+sleep 15
 ```
+### TODO: tshoot --with kubernetes:image='pod_image:latest'

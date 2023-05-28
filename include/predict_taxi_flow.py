@@ -1,6 +1,6 @@
 from metaflow import FlowSpec, step, namespace
 
-namespace('user:astro')
+namespace(None)
 class PredictTripDurationFlow(FlowSpec):
 
 	@step
