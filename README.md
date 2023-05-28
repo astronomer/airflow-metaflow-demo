@@ -126,6 +126,6 @@ astro dev bash -s
 ```bash
 airflow dags trigger data_engineering_day.py
 cd /usr/local/airflow/dags
-python ../include/train_taxi_flow.py airflow create train_taxi_flow.py
-python ../include/predict_taxi_flow.py airflow create predict_taxi_flow.py
+python ../include/train_taxi_flow.py airflow create train_taxi_dag.py
+python ../include/predict_taxi_flow.py airflow create predict_taxi_dag.py
 ```
