@@ -44,14 +44,26 @@ Note: The Metaflow steps run as [KubernetesPodOperator](https://airflow.apache.o
 
 Networking: Docker Desktop automatically creates a local network using `host.docker.internal` and maps it in each container.  The `.env` file has been setup with this hostname.  If using a different Docker service these names may need to be updated.
 
-1. Setup the project directory:
+1. Install Astronomer's [Astro CLI](https://github.com/astronomer/astro-cli).  The Astro CLI is an Apache 2.0 licensed, open-source tool for building Airflow instances and is the fastest and easiest way to be up and running with Airflow in minutes. 
+  
+For MacOS  
+```bash
+brew install astro
+```
+  
+For Linux
+```bash
+curl -sSL install.astronomer.io | sudo bash -s
+```
+  
+2. Setup the project directory:
 ```sh
 git clone https://github.com/astronomer/airflow-metaflow-demo
 cd airflow-metaflow-demo
 cp -R ~/.kube/config include/.kube/
 ```
   
-2. Start Airflow, Metaflow and Minio on your local machine by running 
+3. Start Airflow, Metaflow and Minio on your local machine by running 
 ```sh
 astro dev start
 ```
@@ -73,14 +85,14 @@ Access the UIs for your local project.
 - Minio: http://localhost:9001/ login is `admin` password is `adminadmin`
 
 
-3. Verify that all 8 Docker containers were created by running 'docker ps'.
+4. Verify that all 8 Docker containers were created by running 'docker ps'.
   
-4. Build the OCI image for the Kubernetes pods:
+5. Build the OCI image for the Kubernetes pods:
 ```bash
 docker build -t pod_image:1 include/
 ```
     
-5. Create an Airflow DAG.
+6. Create an Airflow DAG.
     
     Metaflow has the ability to [export a flow as an Airflow DAG](https://docs.metaflow.org/production/scheduling-metaflow-flows/scheduling-with-airflow). This demo environment has already been [configured](https://outerbounds.com/engineering/operations/airflow/#configuring-metaflow-for-airflow) for this process. 
     
@@ -105,9 +117,9 @@ airflow dags trigger TuningFlow
 By default the `dags` directory is only scanned for new files every 5 minutes.  For this demo the list interval was set to 10 seconds via `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` in the `.env` file.  This is not advised in production.
 
   
-8. Connect to the Airflow UI to track status for [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
+7. Connect to the Airflow UI to track status for [TuningFlow](http://localhost:8080/dags/TuningFlow/grid)
 
-9. Often different teams will use different tools.  In the next example the Data Engineering team is using Airflow for ELT and feature engineering while the ML team is using Metaflow for model training, prediction and evaluation.  In the next workflow the ML team builds their flows and creates Airflow DAGs which are automatically triggered by [Airflow Data Aware Scheduling](https://docs.astronomer.io/learn/airflow-datasets).
+8. Often different teams will use different tools.  In the next example the Data Engineering team is using Airflow for ELT and feature engineering while the ML team is using Metaflow for model training, prediction and evaluation.  In the next workflow the ML team builds their flows and creates Airflow DAGs which are automatically triggered by [Airflow Data Aware Scheduling](https://docs.astronomer.io/learn/airflow-datasets).
 
 ### work in progress
 ```sh
@@ -129,7 +141,7 @@ sleep 25
 airflow dags trigger PredictTripDurationFlow
 ```
   
-10. Connect to the Airflow UI to track status for the [TrainTripDurationFlow](http://localhost:8080/dags/TrainTripDurationFlow/grid) and [PredictTripDurationFlow](http://localhost:8080/dags/PredictTripDurationFlow/grid) flows.
+9. Connect to the Airflow UI to track status for the [TrainTripDurationFlow](http://localhost:8080/dags/TrainTripDurationFlow/grid) and [PredictTripDurationFlow](http://localhost:8080/dags/PredictTripDurationFlow/grid) flows.
 
 
 
