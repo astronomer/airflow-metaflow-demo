@@ -87,7 +87,7 @@ This command will spin up 8 Docker containers on your machine including:
 Access the UIs for your local project. 
 - Airflow UI: http://localhost:8080/ login is `admin` password is `admin`
 - Metaflow UI: http://localhost:3000/
-- Minio: http://localhost:9001/ login is `admin` password is `adminadmin`
+- Minio: http://localhost:9001/ login is `minioadmin` password is `minioadmin`
   
 4. Verify that all 8 Docker containers were created by running 'docker ps'.
   
