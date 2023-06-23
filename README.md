@@ -89,7 +89,7 @@ Access the UIs for your local project.
 - Metaflow UI: http://localhost:3000/
 - Minio: http://localhost:9001/ login is `minioadmin` password is `minioadmin`
   
-4. Verify that all 8 Docker containers were created by running 'docker ps'.
+4. Verify that all 8 Docker containers were created by running `docker ps`
   
 5. Setup Airflow DAGs.
   
