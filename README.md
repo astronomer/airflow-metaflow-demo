@@ -121,8 +121,8 @@ Connect to the Metaflow UI to track the status of the [Train](http://localhost:3
 7. Export the training and predict Flows as Airflow DAGs for production.
 ```bash
 cd /usr/local/airflow/dags
-python ../include/train_taxi_flow.py --with kubernetes:image='pod_image:local' airflow create train_taxi_dag.py
-python ../include/predict_taxi_flow.py --with kubernetes:image='pod_image:local' airflow create predict_taxi_dag.py
+python ../include/train_taxi_flow.py --with kubernetes:image='pod_image:local' --with environment:vars='{"AWS_ACCESS_KEY_ID": "minioadmin", "AWS_SECRET_ACCESS_KEY": "minioadmin"}' airflow create train_taxi_dag.py
+python ../include/predict_taxi_flow.py --with kubernetes:image='pod_image:local' --with environment:vars='{"AWS_ACCESS_KEY_ID": "minioadmin", "AWS_SECRET_ACCESS_KEY": "minioadmin"}' airflow create predict_taxi_dag.py
 ```
 
 Note: By default the `dags` directory is only scanned for new files every 5 minutes.  For this demo the list interval was set to 10 seconds via `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` in the `.env` file.  This is not advised in production.
@@ -138,5 +138,4 @@ airflow dags trigger PredictTripDurationFlow
 
 ### TODO: setup data aware scheduling with metaflows airflow create.
 ### TODO: fix namespace issue so we don't have to use global
-### TODO: tshoot --with environment:vars='{\"AWS_ACCESS_KEY_ID\": \"admin\", \"AWS_SECRET_ACCESS_KEY\": \"adminadmin\"}'
 ### TODO: How to run in astro hosted and metaflow sandbox
