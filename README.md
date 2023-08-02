@@ -134,7 +134,6 @@ Connect to the Metaflow UI to track the status of the [Train](http://localhost:3
 ### 7. Export the training and predict Flows as Airflow DAGs for production
 ```bash
 cd /usr/local/airflow/dags
-export METAFLOW_AIRFLOW_KUBERNETES_KUBECONFIG_CONTEXT=docker-desktop
 python ../include/train_taxi_flow.py --with kubernetes:image='pod_image:local' --with environment:vars='{"AWS_ACCESS_KEY_ID": "minioadmin", "AWS_SECRET_ACCESS_KEY": "minioadmin"}' airflow create train_taxi_dag.py
 python ../include/predict_taxi_flow.py --with kubernetes:image='pod_image:local' --with environment:vars='{"AWS_ACCESS_KEY_ID": "minioadmin", "AWS_SECRET_ACCESS_KEY": "minioadmin"}' airflow create predict_taxi_dag.py
 ```
