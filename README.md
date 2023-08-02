@@ -159,8 +159,3 @@ You can use many of the typical Metaflow features with this Airflow integration,
 
 The open-source Metaflow features that **are not** currently supported for this integration include:
 - [event-triggering](https://docs.metaflow.org/api/argoevent)
-
-
-### TODO: setup data aware scheduling with metaflows airflow create
-### TODO: fix namespace issue so we don't have to use global
-### TODO: How to run in astro hosted and metaflow sandbox
