@@ -75,7 +75,10 @@ cp -R ~/.kube/config include/.kube/
 git clone https://github.com/Netflix/metaflow-ui include/metaflow-ui
 ```
   
-### 3. Start Airflow, Metaflow and Minio on your local machine 
+### 3. Start Airflow, Metaflow and Minio on your local machine
+
+> Before running this command, make sure the following ports on your local machine are available: 3000, 5432, 8080, 8081, 8082, 8083, 9000, 9001. For example, you can use this command on Linux or MacOS to check port 3000 `sudo lsof -i:3000`.
+
 ```sh
 astro dev start
 ```
