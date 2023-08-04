@@ -1,5 +1,28 @@
 version: '3.1'
 services:    
+  scheduler:
+    environment:
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: '10'
+      AIRFLOW_CONN_POSTGRES_DEFAULT: '{"conn_type": "postgres", "login": "postgres", "password": "postgres", "host": "postgres", "port": 5432, "schema": "postgres"}'
+      AIRFLOW_CONN_MINIO_DEFAULT: '{"conn_type": "aws", "login": "minioadmin", "password": "minioadmin", "extra": "{\"aws_access_key_id\": \"minioadmin\", \"aws_secret_access_key\": \"minioadmin\", \"endpoint_url\": \"http://minio:9000\"}"}'
+      AIRFLOW_CONN_KUBERNETES_DEFAULT: '{"conn_type": "kubernetes", "extra": {"in_cluster": false, "kube_config_path": "/usr/local/airflow/include/.kube/config", "namespace": "docker-desktop"}}'
+      AWS_ACCESS_KEY_ID: 'minioadmin'
+      AWS_SECRET_ACCESS_KEY: 'minioadmin'
+      USERNAME: 'astro'
+      METAFLOW_AIRFLOW_KUBERNETES_CONN_ID: 'kubernetes_default'
+      METAFLOW_AIRFLOW_KUBERNETES_KUBECONFIG_CONTEXT: docker-desktop
+      METAFLOW_DATASTORE_SYSROOT_S3: 's3://metaflow-data/metaflow'
+      METAFLOW_S3_ENDPOINT_URL: 'http://host.docker.internal:9000'
+      METAFLOW_DATATOOLS_S3ROOT: 's3://metaflow-data/data'
+      METAFLOW_SERVICE_INTERNAL_URL: 'http://host.docker.internal:8081'
+      METAFLOW_SERVICE_URL: 'http://host.docker.internal:8081'
+      METAFLOW_SERVICE: 'http://localhost:8083/'
+      METAFLOW_DEFAULT_DATASTORE: 's3'
+      METAFLOW_DEFAULT_METADATA: 'service'
+    networks:
+      - airflow
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
   minio:
     image: quay.io/minio/minio
     command:
@@ -12,7 +35,9 @@ services:
     - 9001:9001
     volumes:
     - ${PWD}/include/minio/data:/data
-    env_file: .env
+    environment:
+      MINIO_ROOT_USER: 'minioadmin'
+      MINIO_ROOT_PASSWORD: 'minioadmin'
     networks:
       - airflow
     extra_hosts:
@@ -20,14 +45,29 @@ services:
   metaflow-metadata-service:
     image: public.ecr.aws/outerbounds/metaflow_metadata_service:2.3.8
     environment:
+      AWS_ACCESS_KEY_ID: 'minioadmin'
+      AWS_SECRET_ACCESS_KEY: 'minioadmin'
       MF_METADATA_PORT: 8081
       MF_MIGRATION_PORT: 8082
-    env_file: .env
+      METAFLOW_AIRFLOW_KUBERNETES_CONN_ID: 'kubernetes_default'
+      METAFLOW_AIRFLOW_KUBERNETES_KUBECONFIG_CONTEXT: docker-desktop
+      METAFLOW_DATASTORE_SYSROOT_S3: 's3://metaflow-data/metaflow'
+      METAFLOW_S3_ENDPOINT_URL: 'http://host.docker.internal:9000'
+      METAFLOW_DATATOOLS_S3ROOT: 's3://metaflow-data/data'
+      METAFLOW_SERVICE_INTERNAL_URL: 'http://host.docker.internal:8081'
+      METAFLOW_SERVICE_URL: 'http://host.docker.internal:8081'
+      METAFLOW_SERVICE:  'http://localhost:8083/'
+      METAFLOW_DEFAULT_DATASTORE: 's3'
+      METAFLOW_DEFAULT_METADATA: 'service'
+      MF_METADATA_DB_NAME: 'postgres'
+      MF_METADATA_DB_PORT: '5432'
+      MF_METADATA_DB_PSWD: 'postgres'
+      MF_METADATA_DB_USER: 'postgres'
+      MF_METADATA_DB_HOST:  'postgres'
+      DB_SCHEMA_NAME: 'public'
     ports: 
     - 8081:8081
     - 8082:8082
-    # links:
-    #   - postgres
     networks:
       - airflow
     depends_on: 
@@ -39,11 +79,9 @@ services:
     build: ./include/metaflow-ui
     environment:
       PORT: 3000
-    env_file: .env
+      METAFLOW_SERVICE: 'http://localhost:8083/'
     ports:
     - 3000:3000
-    # links:
-    #   - postgres
     networks:
       - airflow
     depends_on: 
@@ -58,11 +96,17 @@ services:
       - services.ui_backend_service.ui_server
     environment:
       LOGLEVEL: "DEBUG"
-    env_file: .env
+      AWS_ACCESS_KEY_ID: 'minioadmin'
+      AWS_SECRET_ACCESS_KEY: 'minioadmin'
+      METAFLOW_S3_ENDPOINT_URL: 'http://host.docker.internal:9000'
+      MF_METADATA_DB_NAME: 'postgres'
+      MF_METADATA_DB_PORT: '5432'
+      MF_METADATA_DB_PSWD: 'postgres'
+      MF_METADATA_DB_USER: 'postgres'
+      MF_METADATA_DB_HOST:  'postgres'
+      DB_SCHEMA_NAME: 'public'
     ports:
     - 8083:8083
-    # links:
-    #   - postgres
     networks:
       - airflow
     depends_on: 

@@ -1,17 +1,11 @@
-For more context, you can read the [Better Airflow with Metaflow](https://outerbounds.com/blog/better-airflow-with-metaflow/) post.
-
-<a href="https://outerbounds.com/blog/better-airflow-with-metaflow/">
-<img style="display: block; float: left; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/better-airflow.png"/>
-</a>
-
   
 Overview
 ========
 This demo provides an example of using [Metaflow](https://metaflow.org/) with Apache Airflow.  
   
-When it comes to enterprise workflow orchestration, different teams have different needs filled by different tools.  In this demo, consider a Data Engineering team with pre-existing, managed infrastructure for Apache Airflow workflows, with a goal of creating datasets to be used by a Machine Learning team.  The ML team uses Metaflow to package and run model training, prediction and evaluation. The ML team can build their workflows in Python as they like and [export the flows as an Airflow DAG](https://docs.metaflow.org/production/scheduling-metaflow-flows/scheduling-with-airflow) for production orchestration running on Airflow.  
+When it comes to enterprise workflow orchestration, different teams have different needs fulfilled by different tools.  In this demo, consider a Data Engineering team with pre-existing, managed infrastructure for Apache Airflow workflows.  Of their many workflows some create datasets to be used by a Machine Learning team.  The ML team uses Metaflow to package and run model training, prediction and evaluation. The ML team can build their workflows in Python as they like and [export the flows as an Airflow DAG](https://docs.metaflow.org/production/scheduling-metaflow-flows/scheduling-with-airflow) for production orchestration running on Airflow.  
   
-[Airflow Data Aware Scheduling](https://docs.astronomer.io/learn/airflow-datasets) is used to interface the [Data Engineering DAG](dags/data_engineering_dag.py) with Metaflow in the `include/train_taxi_flow.py` and `include/predict_taxi_flow.py` files.
+In an Enterprise environment Airflow and Metaflow would likely be provided by centralized infrastructure teams or mangaged/hosted services.  In order to demonstrate the Airflow/Metaflow integrations this demo builds with locally running services.
 
 <img style="display: block; float: left; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/airflow.png"/> <img style="display: block; float: right; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/metaflow.png"/>
   
@@ -98,12 +92,10 @@ Access the UIs for your local project.
 - **Airflow UI**: http://localhost:8080/ login is `admin` password is `admin`
 - **Metaflow UI**: http://localhost:3000/
 - **Minio**: http://localhost:9001/ login is `minioadmin` password is `minioadmin`
-
-> When the Airflow UI opens, it will ask you for a login and password. To create this, [install Airflow CLI](https://airflow.apache.org/docs/apache-airflow/stable/start.html#quick-start) and run the following command and (optionally) replace with specific values you want: `airflow users  create --role Admin --username admin --email admin --firstname admin --lastname admin --password admin`
   
 ### 4. Verify all 8 Docker containers were created 
 ```sh
-docker ps
+docker ps | grep -c Up
 ```
   
 ### 5. Setup Airflow DAGs
@@ -161,3 +153,6 @@ You can use many of the typical Metaflow features with this Airflow integration,
 
 The open-source Metaflow features that **are not** currently supported for this integration include:
 - [event-triggering](https://docs.metaflow.org/api/argoevent)
+
+The Airflow features that **are not** currently supported with this integration include:
+- [Airflow Data Aware Scheduling](https://docs.astronomer.io/learn/airflow-datasets) 
