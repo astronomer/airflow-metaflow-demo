@@ -135,13 +135,37 @@ python ../include/predict_taxi_flow.py --with kubernetes:image='pod_image:local'
 
 Note: By default the `dags` directory is only scanned for new files every 5 minutes.  For this demo the list interval was set to 10 seconds via `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` in the `.env` file.  This is not advised in production.
     
-### 8. Trigger the `TrainTripDurationFlow` and `PredictTripDurationFlow` DAGs in Airflow
-```bash
-airflow dags trigger TrainTripDurationFlow
-sleep 25
-airflow dags trigger PredictTripDurationFlow
+### 8. Setup triggering for the `TrainTripDurationFlow` and `PredictTripDurationFlow` DAGs.  
+  
+The data engineering DAG can be configured to trigger the downstream train and predict DAGs with the TriggerDagRunOperator.  Now that the TrainTripDurationFlow and  PredictTripDurationFlow DAGs are in place edit the `dags/data_engineering_dag.py` file and remove the comments for the lines at the bottom.
+
+```python
+    _trigger_train = TriggerDagRunOperator(task_id='trigger_metaflow_train', 
+                                           trigger_dag_id='TrainTripDurationFlow',
+                                           reset_dag_run=True,
+                                           wait_for_completion=True,
+                                           deferrable=True)
+    
+    _trigger_pred = TriggerDagRunOperator(task_id='trigger_metaflow_predict', 
+                                          trigger_dag_id='PredictTripDurationFlow',
+                                          reset_dag_run=True,
+                                          wait_for_completion=True,
+                                          deferrable=True)
+    _feature_file \
+        >> _trigger_train \
+            >> _trigger_pred
 ```  
-### 9. Connect to the [Airflow UI](http://localhost:8080/) to track status of the DAG runs
+
+### 9. Trigger the DAG run again with data engineering, feature engineering, model training and prediction.
+```sh
+astro dev bash -s
+```
+
+Trigger the Data Engineering and Feature Engineering DAG
+```bash
+airflow dags trigger data_engineering_dag
+```
+Connect to the [Airflow UI](http://localhost:8080/) to track status of the DAG runs.  After the [Data Engineering DAG](http://localhost:8080/dags/data_engineering_dag/grid) completes it will trigger the [TrainTripDurationFlow](http://localhost:8080/dags/TrainTripDurationFlow/grid) DAG and then the [PredictTripDurationFlow](http://localhost:8080/dags/PredictTripDurationFlow/grid) DAG.
 
 ### 10. Add more Metaflow features
 You can use many of the typical Metaflow features with this Airflow integration, including: 

@@ -66,23 +66,22 @@ def data_engineering_dag():
                                     output_file=File(path='S3://taxi-data/taxi_features.parquet', 
                                     conn_id=_S3_CONN_ID), 
                                     if_exists='replace')
-                            
-    
-    _trigger_train = TriggerDagRunOperator(task_id='trigger_metaflow_train', 
-                                           trigger_dag_id='TrainTripDurationFlow',
-                                           reset_dag_run=True,
-                                           wait_for_completion=True,
-                                           deferrable=True)
-    
-    _trigger_pred = TriggerDagRunOperator(task_id='trigger_metaflow_predict', 
-                                          trigger_dag_id='PredictTripDurationFlow',
-                                          reset_dag_run=True,
-                                          wait_for_completion=True,
-                                          deferrable=True)
     
     _feature_file >> aql.cleanup()
-    _feature_file \
-        >> _trigger_train \
-            >> _trigger_pred
+
+    # _trigger_train = TriggerDagRunOperator(task_id='trigger_metaflow_train', 
+    #                                        trigger_dag_id='TrainTripDurationFlow',
+    #                                        reset_dag_run=True,
+    #                                        wait_for_completion=True,
+    #                                        deferrable=True)
+    
+    # _trigger_pred = TriggerDagRunOperator(task_id='trigger_metaflow_predict', 
+    #                                       trigger_dag_id='PredictTripDurationFlow',
+    #                                       reset_dag_run=True,
+    #                                       wait_for_completion=True,
+    #                                       deferrable=True)
+    # _feature_file \
+    #     >> _trigger_train \
+    #         >> _trigger_pred
     
 data_engineering_dag()
