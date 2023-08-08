@@ -1,4 +1,12 @@
-  
+<table>
+    <tr><img style="display: block; float: center; max-width: 80%; height: auto; margin: auto; float: none!important;" src="include/images/airflow.png"/></tr> 
+    <tr>
+        <td style="padding-top: 100px"> <img src="include/images/metaflow1.png"/>
+        <td style="padding-top: 100px"> <img src="include/images/metaflow2.png"/> 
+    </tr>
+</table>
+
+
 Overview
 ========
 This demo provides an example of using [Metaflow](https://metaflow.org/) with Apache Airflow.  
@@ -7,8 +15,6 @@ When it comes to enterprise workflow orchestration, different teams have differe
   
 In an Enterprise environment Airflow and Metaflow would likely be provided by centralized infrastructure teams or mangaged/hosted services.  In order to demonstrate the Airflow/Metaflow integrations this demo builds with locally running services.
 
-<img style="display: block; float: left; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/airflow.png"/> <img style="display: block; float: right; max-width: 20%; height: auto; margin: auto; float: none!important;" src="include/images/metaflow.png"/>
-  
 Project services
 ================
 
